@@ -1,0 +1,457 @@
+<project_specification>
+  <project_name>Agentic RAG System</project_name>
+
+  <overview>
+    An intelligent document assistant that handles both unstructured text (PDF, TXT, Word, Markdown) via semantic vector search and structured tabular data (CSV, Excel, JSON) via SQL queries. The system replicates the logic of an n8n workflow, providing a conversational interface to query, analyze, and compare documents. Built as a Python backend with React frontend, styled similar to OpenWebUI.
+  </overview>
+
+  <technology_stack>
+    <frontend>
+      <framework>React</framework>
+      <styling>CSS Modules or Tailwind CSS</styling>
+      <ui_style>OpenWebUI-inspired interface</ui_style>
+    </frontend>
+    <backend>
+      <runtime>Python 3.11+</runtime>
+      <framework>FastAPI</framework>
+      <ai_framework>LangChain / LangGraph (preferred for agentic flows)</ai_framework>
+      <database>PostgreSQL with pgvector extension</database>
+    </backend>
+    <llm_providers>
+      <primary>OpenAI (GPT-4o, GPT-4o-mini) - default</primary>
+      <secondary>Ollama (auto-detect installed models)</secondary>
+    </llm_providers>
+    <embedding_models>
+      <primary>OpenAI text-embedding-3-small (default)</primary>
+      <secondary>Ollama embedding models</secondary>
+    </embedding_models>
+    <reranker>
+      <primary>Cohere (default)</primary>
+      <secondary>Cross-Encoder locale</secondary>
+    </reranker>
+    <communication>
+      <api>REST API</api>
+      <realtime>WebSocket for streaming responses</realtime>
+    </communication>
+  </technology_stack>
+
+  <prerequisites>
+    <environment_setup>
+      - Python 3.11 or higher
+      - Node.js 18+ and npm
+      - PostgreSQL 15+ with pgvector extension
+      - OpenAI API key (configurable via UI)
+      - Optional: Ollama installed locally
+      - Optional: Cohere API key for re-ranking
+    </environment_setup>
+  </prerequisites>
+
+  <feature_count>90</feature_count>
+
+  <security_and_access_control>
+    <user_roles>
+      <role name="user">
+        <permissions>
+          - Full access to all features (single-user mode)
+          - Upload, view, delete documents
+          - Create and manage collections
+          - Chat with agent
+          - Configure API keys and models
+          - Export data and create backups
+        </permissions>
+        <protected_routes>
+          - None (local single-user application)
+        </protected_routes>
+      </role>
+    </user_roles>
+    <authentication>
+      <method>None (local single-user application for MVP)</method>
+      <session_timeout>None</session_timeout>
+    </authentication>
+    <sensitive_operations>
+      - API key storage (encrypted in local config)
+      - Document deletion confirmation
+      - Collection deletion confirmation (documents moved to "Uncategorized")
+    </sensitive_operations>
+  </security_and_access_control>
+
+  <core_features>
+    <document_management>
+      - Upload documents (PDF, TXT, CSV, Excel, Word, JSON, Markdown)
+      - Add custom name and comment to documents
+      - View list of all uploaded documents with metadata
+      - Preview document content (first rows for tabular, excerpts for text)
+      - Delete documents with confirmation
+      - Detect and block duplicate file uploads
+      - File size limit: 100MB
+      - Progress indicator during upload/processing
+    </document_management>
+
+    <collection_management>
+      - Create collections/folders to organize documents
+      - Move documents between collections
+      - Rename and delete collections
+      - Documents from deleted collections move to "Uncategorized"
+      - View documents filtered by collection
+    </collection_management>
+
+    <ingestion_pipeline>
+      <structured_data>
+        - Parse CSV/Excel/JSON files with Pandas
+        - Extract headers and store schema in document_metadata
+        - Convert rows to JSONB and store in document_rows table
+        - Link rows to dataset_id for SQL queries
+        - Do NOT vectorize structured data
+      </structured_data>
+      <unstructured_data>
+        - Semantic chunking using LLM-based "Agentic Splitter"
+        - Algorithm: Take chunk, ask LLM for semantic transition point, split at that point
+        - Create embeddings with configurable model (OpenAI default)
+        - Store vectors in PGVector (langchain_pg_embedding table)
+        - Support for PDF, TXT, Word (.docx), Markdown
+      </unstructured_data>
+    </ingestion_pipeline>
+
+    <ai_agent>
+      <architecture>ReAct Agent or OpenAI Functions Agent with router</architecture>
+      <system_prompt>
+        "You are a personal assistant answering questions based on a corpus of documents.
+        Documents are either text or tabular. Rules:
+        - Always start by checking if the question requires retrieving information (RAG) or calculating data (SQL)
+        - If the user asks for a calculation, sum, average, or specific lookup in a CSV/Excel file, use the SQL Tool
+        - If the user asks a general question or searches for textual info, use the Vector Search Tool
+        - If RAG fails, try listing the documents to see what is available
+        - Respond in the same language as the user (Italian or English)
+        - Provide comprehensive and coherent answers"
+      </system_prompt>
+      <tools>
+        <sql_analysis_tool>
+          - Execute SQL queries on document_rows table
+          - Query JSONB fields in row_data column
+          - Example: SELECT SUM((row_data->>'Revenue')::numeric) FROM document_rows WHERE dataset_id = 'file_123'
+        </sql_analysis_tool>
+        <vector_search_tool>
+          - Semantic similarity search in text knowledge base
+          - Use re-ranker (Cohere default, Cross-Encoder alternative) to filter top-k results
+          - Return relevant chunks with source attribution
+        </vector_search_tool>
+        <list_documents_tool>
+          - List all available files with IDs, types, and schemas
+          - Help agent understand available data sources
+        </list_documents_tool>
+      </tools>
+      <cross_document_analysis>
+        - Query multiple documents simultaneously
+        - Compare data across different files
+        - Aggregate information from various sources
+      </cross_document_analysis>
+    </ai_agent>
+
+    <chat_interface>
+      - Conversational chat with message history
+      - Show agent "thinking" status with tool being used
+      - Expandable panel showing details (SQL query, chunks found)
+      - Comprehensive and coherent responses
+      - Bilingual support: Italian and English
+      - Session-based conversation memory
+      - Conversation history saved between sessions
+    </chat_interface>
+
+    <configuration_ui>
+      - Configure OpenAI API key from interface
+      - Configure Cohere API key from interface
+      - Select LLM model (OpenAI GPT-4o, GPT-4o-mini, or Ollama models)
+      - Auto-detect installed Ollama models
+      - Select embedding model (OpenAI or Ollama)
+      - Select re-ranker (Cohere or Cross-Encoder)
+      - Theme selection: light/dark mode
+    </configuration_ui>
+
+    <export_and_backup>
+      - Export analysis results (tables as CSV/Excel)
+      - Save chat responses as report
+      - Full backup: export all documents, conversations, settings
+      - Import backup to restore or migrate
+    </export_and_backup>
+
+    <error_handling>
+      - Detailed error messages for unsupported formats
+      - File size limit exceeded warnings
+      - Network failure handling with auto-retry (2-3 attempts)
+      - Manual retry option after failed attempts
+      - Clear feedback for all error states
+    </error_handling>
+
+    <user_experience>
+      - Welcome message and quick tutorial on first launch
+      - Empty state guidance when no documents uploaded
+      - Progress bars for long operations (upload, indexing)
+      - Loading indicators during agent processing
+    </user_experience>
+  </core_features>
+
+  <database_schema>
+    <tables>
+      <document_metadata>
+        - id (Text/UUID, Primary Key)
+        - title (Text) - custom name given by user
+        - original_filename (Text) - original file name
+        - comment (Text) - user's description/notes
+        - url (Text) - file storage path
+        - mime_type (Text) - file type
+        - file_size (Integer) - size in bytes
+        - collection_id (Text, FK to collections.id, nullable)
+        - document_type (Text) - 'structured' or 'unstructured'
+        - schema (Text) - stores CSV headers/schema info for structured data
+        - created_at (Timestamp)
+        - updated_at (Timestamp)
+      </document_metadata>
+
+      <document_rows>
+        - id (Serial, Primary Key)
+        - dataset_id (Text, FK to document_metadata.id)
+        - row_data (JSONB) - entire row as JSON object
+        - created_at (Timestamp)
+      </document_rows>
+
+      <collections>
+        - id (Text/UUID, Primary Key)
+        - name (Text)
+        - description (Text, nullable)
+        - created_at (Timestamp)
+        - updated_at (Timestamp)
+      </collections>
+
+      <conversations>
+        - id (Text/UUID, Primary Key)
+        - title (Text) - auto-generated or user-defined
+        - created_at (Timestamp)
+        - updated_at (Timestamp)
+      </conversations>
+
+      <messages>
+        - id (Text/UUID, Primary Key)
+        - conversation_id (Text, FK to conversations.id)
+        - role (Text) - 'user' or 'assistant'
+        - content (Text)
+        - tool_used (Text, nullable) - which tool was invoked
+        - tool_details (JSONB, nullable) - SQL query, chunks found, etc.
+        - created_at (Timestamp)
+      </messages>
+
+      <settings>
+        - key (Text, Primary Key)
+        - value (Text) - encrypted for sensitive values like API keys
+        - updated_at (Timestamp)
+      </settings>
+
+      <langchain_pg_embedding>
+        - Standard LangChain PGVector table structure
+        - id, embedding, document, metadata, collection_id
+      </langchain_pg_embedding>
+    </tables>
+  </database_schema>
+
+  <api_endpoints_summary>
+    <documents>
+      - POST /api/ingest - Upload and process document
+      - GET /api/documents - List all documents
+      - GET /api/documents/{id} - Get document details
+      - GET /api/documents/{id}/preview - Get document preview
+      - DELETE /api/documents/{id} - Delete document
+      - PATCH /api/documents/{id} - Update name/comment/collection
+    </documents>
+    <collections>
+      - POST /api/collections - Create collection
+      - GET /api/collections - List all collections
+      - GET /api/collections/{id} - Get collection with documents
+      - PATCH /api/collections/{id} - Update collection
+      - DELETE /api/collections/{id} - Delete collection (moves docs to uncategorized)
+    </collections>
+    <chat>
+      - POST /api/chat - Send message and get response
+      - GET /api/conversations - List all conversations
+      - GET /api/conversations/{id} - Get conversation with messages
+      - DELETE /api/conversations/{id} - Delete conversation
+      - POST /api/conversations - Create new conversation
+    </chat>
+    <settings>
+      - GET /api/settings - Get all settings
+      - PATCH /api/settings - Update settings
+      - GET /api/models/ollama - List available Ollama models
+    </settings>
+    <export>
+      - POST /api/export/results - Export analysis results
+      - POST /api/backup - Create full backup
+      - POST /api/restore - Restore from backup
+    </export>
+  </api_endpoints_summary>
+
+  <ui_layout>
+    <main_structure>
+      OpenWebUI-inspired layout with three main areas:
+      - Left Sidebar: Conversation list, document management, collection browser
+      - Center: Main chat interface with message history
+      - Right Panel (collapsible): Document details, agent thinking process, tool outputs
+    </main_structure>
+    <sidebar_sections>
+      - New Chat button
+      - Conversation history list
+      - Documents section (expandable)
+        - Upload button
+        - Collection tree view
+        - Document list with quick actions
+      - Settings button at bottom
+    </sidebar_sections>
+    <chat_area>
+      - Message bubbles with user/assistant distinction
+      - Typing indicator when agent is processing
+      - Tool usage badges (e.g., "Using SQL Analysis...", "Searching documents...")
+      - Expandable details for each response (show SQL, show sources)
+      - Input area with send button
+    </chat_area>
+    <modals>
+      - Document upload modal with name/comment fields
+      - Document preview modal
+      - Settings modal for API keys and model selection
+      - Confirmation dialogs for delete actions
+      - Welcome/tutorial modal on first launch
+    </modals>
+  </ui_layout>
+
+  <design_system>
+    <color_palette>
+      <light_theme>
+        - Background: #FFFFFF
+        - Sidebar: #F7F7F8
+        - Primary: #10A37F (green accent)
+        - Text: #1A1A1A
+        - Secondary text: #6B6B6B
+        - Border: #E5E5E5
+      </light_theme>
+      <dark_theme>
+        - Background: #212121
+        - Sidebar: #171717
+        - Primary: #10A37F (green accent)
+        - Text: #ECECEC
+        - Secondary text: #8E8E8E
+        - Border: #2F2F2F
+      </dark_theme>
+    </color_palette>
+    <typography>
+      - Font family: Inter, system-ui, sans-serif
+      - Headings: Semi-bold
+      - Body: Regular
+      - Code/SQL: JetBrains Mono, monospace
+    </typography>
+  </design_system>
+
+  <implementation_steps>
+    <step number="1">
+      <title>Project Setup and Database</title>
+      <tasks>
+        - Initialize FastAPI project structure
+        - Set up PostgreSQL with pgvector extension
+        - Create database models and migrations
+        - Implement basic health check endpoint
+      </tasks>
+    </step>
+    <step number="2">
+      <title>Document Ingestion Pipeline</title>
+      <tasks>
+        - Implement file upload endpoint
+        - Create structured data parser (CSV, Excel, JSON)
+        - Create unstructured data parser (PDF, TXT, Word, Markdown)
+        - Implement semantic chunking with LLM
+        - Set up embedding generation and PGVector storage
+      </tasks>
+    </step>
+    <step number="3">
+      <title>AI Agent Core</title>
+      <tasks>
+        - Set up LangChain/LangGraph agent
+        - Implement SQL analysis tool
+        - Implement vector search tool with re-ranker
+        - Implement list documents tool
+        - Create agent router logic
+      </tasks>
+    </step>
+    <step number="4">
+      <title>API Endpoints</title>
+      <tasks>
+        - Document CRUD endpoints
+        - Collection CRUD endpoints
+        - Chat and conversation endpoints
+        - Settings endpoints
+        - Export/backup endpoints
+      </tasks>
+    </step>
+    <step number="5">
+      <title>React Frontend - Core</title>
+      <tasks>
+        - Set up React project with routing
+        - Create main layout (sidebar, chat area)
+        - Implement chat interface with message display
+        - Add loading states and tool usage indicators
+      </tasks>
+    </step>
+    <step number="6">
+      <title>React Frontend - Features</title>
+      <tasks>
+        - Document upload and management UI
+        - Collection management UI
+        - Settings modal with API configuration
+        - Theme switching (light/dark)
+        - Welcome tutorial
+      </tasks>
+    </step>
+    <step number="7">
+      <title>Polish and Error Handling</title>
+      <tasks>
+        - Implement error handling throughout
+        - Add progress indicators
+        - Implement backup/restore functionality
+        - Test cross-document analysis
+        - Final UI polish
+      </tasks>
+    </step>
+  </implementation_steps>
+
+  <success_criteria>
+    <functionality>
+      - Can upload PDF, TXT, CSV, Excel, Word, JSON, Markdown files
+      - Can ask questions and receive accurate answers
+      - SQL tool correctly queries tabular data
+      - Vector search finds relevant text passages
+      - Agent chooses correct tool based on question type
+    </functionality>
+    <user_experience>
+      - Interface is intuitive and responsive
+      - Feedback is clear during all operations
+      - Errors are explained in detail
+      - Documents are easy to organize and find
+    </user_experience>
+    <technical_quality>
+      - No mock data - all data comes from real database
+      - API responses are fast and reliable
+      - Retry logic handles transient failures
+      - Backup/restore works correctly
+    </technical_quality>
+    <design_polish>
+      - Clean, modern interface similar to OpenWebUI
+      - Consistent styling across all components
+      - Smooth transitions and loading states
+      - Theme switching works correctly
+    </design_polish>
+  </success_criteria>
+
+  <future_enhancements>
+    <phase_2>
+      - Keyboard shortcuts for common actions
+      - Notifications for completed long operations
+      - Query history and suggestions
+      - Multi-user authentication
+      - Cloud deployment configuration
+    </phase_2>
+  </future_enhancements>
+</project_specification>
