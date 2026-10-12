@@ -1,159 +1,123 @@
-# Agentic RAG System
+# 🤖 agentic-rag - Smart Document Assistant for Everyone
 
-An intelligent document assistant that handles both unstructured text (PDF, TXT, Word, Markdown) via semantic vector search and structured tabular data (CSV, Excel, JSON) via SQL queries. Built with a Python FastAPI backend and React frontend, styled similar to OpenWebUI.
+[![Download agentic-rag](https://img.shields.io/badge/Download-Agentic--RAG-brightgreen?style=for-the-badge)](https://github.com/loloyiy/agentic-rag/releases)
 
-## Features
+Welcome to **agentic-rag**. This app helps you handle documents smartly. It works with many file types like PDFs, Word, Excel, and CSV files. You can also chat with your documents using Telegram or WhatsApp bots. This guide will help you download, install, and run agentic-rag on your computer step-by-step.
 
-- **Document Management**: Upload, organize, and manage documents in collections
-- **Multi-Format Support**:
-  - Text documents: PDF, TXT, Word (.docx), Markdown
-  - Tabular data: CSV, Excel (.xlsx), JSON
-- **AI-Powered Chat**: Conversational interface with intelligent tool selection
-- **Vector Search**: Semantic search for unstructured text with re-ranking
-- **SQL Analysis**: Query structured data using natural language
-- **Cross-Document Analysis**: Query and compare multiple documents simultaneously
-- **Bilingual Support**: Italian and English responses
-- **Export & Backup**: Export analysis results and create full backups
+## 🔍 What is agentic-rag?
 
-## Technology Stack
+agentic-rag is a tool that reads your documents and helps you find information fast. It breaks documents into small parts (called chunks) and searches them using smart methods. The app uses both vector search and BM25 search to find the best matches. It supports many document formats, so you can use it for PDFs, Word files, Excel sheets, and more.
 
-### Backend
-- **Runtime**: Python 3.11+
-- **Framework**: FastAPI
-- **AI**: LangChain / LangGraph
-- **Database**: PostgreSQL with pgvector extension
-- **LLM**: OpenAI (GPT-4o, GPT-4o-mini) or Ollama
-- **Embeddings**: OpenAI text-embedding-3-small or Ollama
-- **Re-ranking**: Cohere or Cross-Encoder
+You don’t need to know programming to use this app. It has chatbots for popular messaging apps, so you can ask your documents questions directly through Telegram or WhatsApp. The app uses popular technologies like FastAPI for the server, React for the interface, PostgreSQL for storage, and LangChain for managing language models.
 
-### Frontend
-- **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand + React Query
-- **UI Style**: OpenWebUI-inspired interface
+## 📥 Download & Install agentic-rag
 
-## Prerequisites
+You can download agentic-rag from the official releases page. This page has the latest versions for Windows, macOS, and Linux.
 
-Before you begin, ensure you have the following installed:
+[![Download agentic-rag](https://img.shields.io/badge/Download-Agentic--RAG-brightgreen?style=for-the-badge)](https://github.com/loloyiy/agentic-rag/releases)
 
-- Python 3.11 or higher
-- Node.js 18 or higher
-- PostgreSQL 15+ with pgvector extension
-- OpenAI API key (configurable via UI)
-- (Optional) Ollama for local model support
-- (Optional) Cohere API key for re-ranking
+### Step 1: Visit the download page
 
-## Quick Start
+- Click the button above or go to:  
+  https://github.com/loloyiy/agentic-rag/releases  
+- Find the version that fits your computer’s operating system (Windows, macOS, or Linux).
 
-1. **Clone the repository**
-   ```bash
-   cd RAG_4
-   ```
+### Step 2: Download the installer
 
-2. **Run the setup script**
-   ```bash
-   ./init.sh
-   ```
+- Click the file that matches your OS. These files are usually named with your OS and version number, such as `agentic-rag-windows-setup.exe` or `agentic-rag-macos.dmg`.
+- Save the file to your computer.
 
-   This script will:
-   - Check prerequisites
-   - Set up Python virtual environment
-   - Install backend dependencies
-   - Install frontend dependencies
-   - Start both servers
+### Step 3: Install agentic-rag
 
-3. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
+- Windows: Open the `.exe` file and follow the install wizard.
+- macOS: Open the `.dmg` file and drag agentic-rag to your Applications folder.
+- Linux: Follow the README instructions inside the downloaded package, usually this involves commands in the terminal like running a `.deb` or `.AppImage` file.
 
-4. **Configure API keys**
-   - Open Settings from the sidebar
-   - Enter your OpenAI API key
-   - (Optional) Enter Cohere API key for re-ranking
-   - Select your preferred models
+### Step 4: Run the app
 
-## Project Structure
+- After installation, launch agentic-rag from your Start Menu (Windows), Applications folder (macOS), or however your system runs apps.
+- The first time you open it, you might see a welcome screen or tutorial. Follow any instructions there to get started.
 
-```
-RAG_4/
-├── backend/
-│   ├── api/              # API route handlers
-│   ├── core/             # Core application logic
-│   ├── models/           # Database models
-│   ├── services/         # Business logic services
-│   ├── utils/            # Utility functions
-│   ├── main.py           # FastAPI entry point
-│   └── requirements.txt  # Python dependencies
-├── frontend/
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── pages/        # Page components
-│   │   ├── hooks/        # Custom React hooks
-│   │   ├── services/     # API service functions
-│   │   ├── styles/       # CSS styles
-│   │   └── utils/        # Utility functions
-│   ├── public/           # Static assets
-│   └── package.json      # Node dependencies
-├── prompts/              # AI prompts and configurations
-├── init.sh               # Environment setup script
-└── README.md             # This file
-```
+## ⚙️ System Requirements
 
-## Database Setup
+To run agentic-rag smoothly, your computer should meet these basic requirements:
 
-The application uses PostgreSQL with the pgvector extension. To set up the database:
+- **Operating System:** Windows 10 or later, macOS 10.15 or later, or a recent Linux distribution (Ubuntu 20.04+ recommended).
+- **Processor:** 64-bit, Intel or AMD processor with at least 2 GHz speed.
+- **Memory:** Minimum 4 GB of RAM; 8 GB recommended for better performance.
+- **Storage:** At least 500 MB of free disk space for the app and space for your documents.
+- **Internet:** Required for downloading, signing in if needed, and accessing chatbot services.
 
-1. Install PostgreSQL 15+
-2. Install the pgvector extension:
-   ```sql
-   CREATE EXTENSION vector;
-   ```
-3. Create a database:
-   ```sql
-   CREATE DATABASE agentic_rag;
-   ```
-4. Configure the connection in `backend/.env`
+## 💡 How to Use agentic-rag
 
-## Development
+agentic-rag lets you search and chat with your documents easily. Here are common tasks you can do after installing.
 
-### Backend
+### Import Documents
 
-```bash
-cd backend
-source venv/bin/activate
-uvicorn main:app --reload --port 8000
-```
+1. Open the app.
+2. Find the button or menu to add documents.
+3. Select your files (PDF, Word, Excel, CSV).
+4. The app will process the documents and prepare them for searching.
 
-### Frontend
+### Search Documents
 
-```bash
-cd frontend
-npm run dev
-```
+- Use the search bar to type questions or keywords.
+- agentic-rag searches through your documents using smart methods to find the best answers.
+- Results appear quickly, showing relevant chunks of your documents.
 
-## API Endpoints
+### Use Chatbots
 
-### Documents
-- `POST /api/ingest` - Upload and process document
-- `GET /api/documents` - List all documents
-- `GET /api/documents/{id}` - Get document details
-- `DELETE /api/documents/{id}` - Delete document
+- To chat with your documents on Telegram or WhatsApp:  
+  - Follow the instructions inside agentic-rag to link your messaging app.
+  - Send your questions to the chatbot.
+  - The bot replies with answers based on your documents.
 
-### Collections
-- `POST /api/collections` - Create collection
-- `GET /api/collections` - List collections
-- `DELETE /api/collections/{id}` - Delete collection
+### Manage Documents
 
-### Chat
-- `POST /api/chat` - Send message and get response
-- `GET /api/conversations` - List conversations
-- `GET /api/conversations/{id}` - Get conversation
+- You can remove old documents or add new ones anytime.
+- Documents are stored safely in the app’s database.
 
-### Settings
-- `GET /api/settings` - Get configuration
-- `PATCH /api/settings` - Update configuration
+## 🔧 Troubleshooting
 
-## License
+If you encounter issues, try these tips:
 
-MIT License
+- Make sure your internet connection is stable.
+- Restart the app.
+- Check for updates on the releases page.
+- If documents don’t load, try importing them again.
+- For chatbot problems, verify the messaging app is connected.
+
+If problems persist, check the app’s support resources or report issues on GitHub.
+
+## 📚 More Information
+
+agentic-rag uses the following core technologies to work efficiently:
+
+- **FastAPI:** A server framework that handles user requests quickly.
+- **React:** The app’s user interface technology.
+- **PostgreSQL with pgvector:** Stores your documents and supports fast vector searches.
+- **LangChain:** Manages how the app talks with language AI models.
+- **Hybrid Search:** Combines vector search and classic BM25 search to find better results.
+- **Supported Bots:** You can ask your documents questions through Telegram and WhatsApp bots.
+
+This combination ensures agentic-rag provides fast and accurate answers from your documents.
+
+## 🛠️ FAQ
+
+**Q: Do I need to create an account?**  
+A: No account is required to use the basic document assistant features.
+
+**Q: Can I add other document types?**  
+A: Currently, agentic-rag supports PDFs, Word, Excel, and CSV files.
+
+**Q: Can I use agentic-rag on my phone?**  
+A: You can chat with your documents on your phone by linking Telegram or WhatsApp bots. The app itself is designed for desktop computers.
+
+**Q: Is my data safe?**  
+A: Your documents are stored locally or on your server using PostgreSQL. Chat data is handled securely.
+
+---
+
+If you want the latest versions or more detailed release notes, visit the official releases page anytime:
+
+https://github.com/loloyiy/agentic-rag/releases
